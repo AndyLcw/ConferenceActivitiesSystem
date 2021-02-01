@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.UserDao">
+	<resultMap type="edu.dlpu.bean.User" id="userMap">
+		<id property="userId" column="userid" />
+		<result property="userName" column="username" />
+		<result property="userGender" column="usergender" />
+		<result property="userPasswd" column="userpasswd" />
+		<result property="userIcon" column="usericon" />
+		<result property="userType" column="usertype" />
+		<result property="userCollege" column="usercollege" />
+		<result property="stuNumber" column="stunumber" />
+		<result property="userPhone" column="userphone" />
+		<result property="userEmail" column="useremail" />
+
+		<result property="applyTime" column="applytime" />
+		<result property="signTime" column="signtime" />
+	</resultMap>
+
+	<!-- 注册用户（非全字段） -->
+	<!-- public void insertUserSimpleDao(User user); -->
+	<insert id="insertUserSimpleDao"
+		parameterType="edu.dlpu.bean.User">
+		<selectKey keyProperty="userId" order="BEFORE"
+			resultType="Integer">
+			select seq_dlpu_user.nextval as userid from dual
+		</selectKey>
+		insert into dlpu_user(userid,username,userpasswd,stunumber)
+		values(#{userId},#{userName},#{userPasswd},#{stuNumber})
+	</insert>
+
+	<!-- 查询所有用户 public ArrayList<User> selectAllUserDao(); -->
+	<select id="selectAllUserDao" resultMap="userMap">
+		select * from dlpu_user
+	</select>
+
+	<!-- 更改用户信息(只更新相关字段)public User updateUserInfoDao(User user); -->
+	<update id="updateUserInfoDao"
+		parameterType="edu.dlpu.bean.User">
+		update dlpu_user
+		<trim prefix="set" suffixOverrides=",">
+			<if test="userName!=null">username=#{userName},</if>
+			<if test="userGender!=null">usergender=#{userGender},</if>
+			<if test="userPasswd!=null">userpasswd=#{userPasswd},</if>
+			<if test="userIcon!=null">usericon=#{userIcon},</if>
+			<if test="userType!=null">usertype=#{userType},</if>
+			<if test="userCollege!=null">usercollege=#{userCollege},</if>
+			<if test="stuNumber!=null">stunumber=#{stuNumber},</if>
+			<if test="userPhone!=null">userphone=#{userPhone},</if>
+			<if test="userEmail!=null">useremail=#{userEmail},</if>
+		</trim>
+		where userid=#{userId}
+	</update>
+
+	<!-- 查询某条会议活动记录的所有报名用户（带条件的连接查询） -->
+	<!-- public ArrayList<User> selectAllApplyUserDao(int applyId); -->
+	<select id="selectAllApplyUserDao" resultMap="userMap">
+		select
+		u.*,ua.applytime from dlpu_user u inner join dlpu_user_apply ua
+		on
+		u.userid=ua.userid
+		where ua.applyid=#{applyId}
+	</select>
+
+
+	<!-- // 查询某条会议活动记录的所有签到用户（带条件的连接查询） -->
+	<!-- public ArrayList<User> selectAllSignUserDao(int signId); -->
+	<select id="selectAllSignUserDao" resultMap="userMap">
+		select
+		u.*,us.signtime from dlpu_user u inner join dlpu_user_sign us
+		on
+		u.userid=us.userid
+		where us.signid=#{signId}
+	</select>
+
+
+</mapper>

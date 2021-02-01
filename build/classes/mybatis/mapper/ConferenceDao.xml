@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.ConferenceDao">
+	<!-- 添加会议活动 public void insertConferenceDao(Conference conf); -->
+	<insert id="insertConferenceDao"
+		parameterType="edu.dlpu.bean.Conference">
+		<selectKey keyProperty="confId" order="BEFORE"
+			resultType="Integer">
+			select seq_dlpu_conference.nextval as confid from dual
+		</selectKey>
+		insert all
+		into
+		dlpu_conference(confid,confname,confperson,conftime,conflocation,conflength,conflocationimg,confmaxperson,confdevice,confintro,conftype)
+		values(#{confId},#{confName},#{confPerson},#{confTime},#{confLocation},#{confLength},#{confLocationImg},#{confMaxPerson},#{confDevice},#{confIntro},#{confType})
+		into
+		dlpu_admin_conference(confid,adminid)
+		values(#{confId},#{adminId})
+		select * from dual
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Conference" id="confMap">
+		<id column="confId" property="confId" />
+		<result column="riskId" property="riskId" />
+		<result column="applyId" property="applyId" />
+		<result column="signId" property="signId" />
+		<result column="confName" property="confName" />
+		<result column="confPerson" property="confPerson" />
+		<result column="confTime" property="confTime" />
+		<result column="confLocation" property="confLocation" />
+		<result column="confLength" property="confLength" />
+		<result column="confLocationImg" property="confLocationImg" />
+		<result column="confMaxPerson" property="confMaxPerson" />
+		<result column="confDevice" property="confDevice" />
+		<result column="adminId" property="adminId" />
+		<result column="confIntro" property="confIntro" />
+		<result column="confType" property="confType" />
+		<result column="applyTime" property="applyTime"
+			jdbcType="VARCHAR" />
+		<result column="signTime" property="signTime"
+			jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- // 查询所有会议活动 public ArrayList<Conference> selectAllConferenceDao(); -->
+	<select id="selectAllConferenceDao" resultMap="confMap">
+		select * from
+		dlpu_conference order by confid
+	</select>
+
+	<!-- //查询单条会议活动记录 public Conference selectConferenceByIdDao(int id); -->
+	<select id="selectConferenceByIdDao" resultMap="confMap"
+		parameterType="java.lang.Integer">
+		select * from
+		dlpu_conference where confid=#{id}
+	</select>
+
+	<!-- <resultMap type="edu.dlpu.bean.Conference" id="adminMap"> <result column="confId" 
+		property="confId" /> <result column="adminId" property="adminId" /> </resultMap> -->
+	<!-- //查询活动_管理员表（验证身份） public int selectAdminByConfIdDao(int confId); -->
+	<select id="selectAdminByConfIdDao" resultType="INTEGER"
+		parameterType="java.lang.Integer">
+		select * from dlpu_admin_conference where
+		confid=#{confId}
+	</select>
+
+	<!-- //修改会议活动记录 public void updateConferenceByIdDao(Conference conf); -->
+	<update id="updateConferenceByIdDao"
+		parameterType="edu.dlpu.bean.Conference">
+		update dlpu_conference
+		<trim prefix="set" suffixOverrides=",">
+			<if test="riskId!=null">riskId=#{riskId},</if>
+			<if test="applyId!=null">applyId=#{applyId},</if>
+			<if test="signId!=null">signId=#{signId},</if>
+			<if test="confName!=null">confName=#{confName},</if>
+			<if test="confPerson!=null">confPerson=#{confPerson},</if>
+			<if test="confTime!=null">confTime=#{confTime},</if>
+			<if test="confLocation!=null">confLocation=#{confLocation},</if>
+			<if test="confLength!=null">confLength=#{confLength},</if>
+			<if test="confLocationImg!=null">confLocationImg=#{confLocationImg},</if>
+			<if test="confMaxPerson!=null">confMaxPerson=#{confMaxPerson},</if>
+			<if test="confDevice!=null">confDevice=#{confDevice},</if>
+			<if test="confIntro!=null">confIntro=#{confIntro},</if>
+			<if test="confType!=null">confType=#{confType},</if>
+		</trim>
+		where confid=#{confId}
+	</update>
+
+	<!-- // 删除会议活动记录 public void deleteConferenceByIdDao(int confId); -->
+	<delete id="deleteConferenceByIdDao">
+		delete from dlpu_conference where confid=#{confId}
+	</delete>
+
+	<!-- //删除管理员_会议活动对应关系 public void deleteAdminConferenceRelationDao(int confId); -->
+	<delete id="deleteAdminConferenceRelationDao">
+		delete from dlpu_admin_conference where
+		confid=#{confId}
+	</delete>
+
+	<!-- //按照会议类型查询会议活动（传入=》字符串） -->
+	<!-- public ArrayList<Conference> selectConferenceByTypeDao(String confType); -->
+	<select id="selectConferenceByTypeDao" resultMap="confMap">
+		select * from
+		dlpu_conference where conftype=#{confType}
+	</select>
+
+	<!-- // 多表连接_查询用户报名数据(用户角度) public ArrayList<Conference> selectAllApplyByUserDao(int 
+		userId); -->
+	<select id="selectAllApplyByUserDao" resultMap="confMap">
+		select
+		conf.*,ua.applyTime
+		from
+		dlpu_conference conf inner join dlpu_user_apply
+		ua
+		on conf.applyid=ua.applyid
+		where userid=#{userId}
+	</select>
+
+	<!-- // 签到管理_查询所有开放了报名的会议活动 public ArrayList<Conference> selectAllOpenConfDao(); -->
+	<select id="selectAllOpenConfDao" resultMap="confMap">
+		select * from
+		dlpu_conference where applyid is not null order by confid
+	</select>
+
+	<!-- // 统计管理=》统计签到==查询所有开放了签到的会议活动 -->
+	<!-- public ArrayList<Conference> selectAllOpenSignConfDao(); -->
+	<select id="selectAllOpenSignConfDao" resultMap="confMap">
+		select * from
+		dlpu_conference where signid is not null order by confid
+	</select>
+
+
+
+</mapper>

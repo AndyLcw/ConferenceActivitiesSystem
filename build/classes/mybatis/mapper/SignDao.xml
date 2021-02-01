@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.SignDao">
+	<!-- // 插入签到数据 public void insertSignByIdDao(Sign sign); -->
+	<insert id="insertSignByIdDao"
+		parameterType="edu.dlpu.bean.Sign">
+		<selectKey keyProperty="signId" order="BEFORE"
+			resultType="Integer">
+			select seq_dlpu_sign.nextval as signid from dual
+		</selectKey>
+		insert into dlpu_sign(signid,riskid,confid,signinfo)
+		values(#{signId},#{riskId},#{confId},#{signInfo})
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Sign" id="signMap">
+		<id column="signId" property="signId" />
+		<result column="riskId" property="riskId" />
+		<result column="confId" property="confId" />
+		<result column="signInfo" property="signInfo" />
+		<result column="userId" property="userId" />
+		<result column="signTime" property="signTime" />
+	</resultMap>
+
+	<!-- // 查询数据（通过riskId） public Sign selectSignByRiskIdDao(int riskId); -->
+	<select id="selectSignByRiskIdDao" resultMap="signMap">
+		select * from
+		dlpu_sign where riskid=#{riskId}
+	</select>
+
+	<!-- // 插入用户_签到数据 public void insertUserSignDao(Sign sign); -->
+	<insert id="insertUserSignDao"
+		parameterType="edu.dlpu.bean.Sign">
+		insert into dlpu_user_sign(userid,signid,signtime)
+		values(#{userId},#{signId},#{signTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<!-- // 查询用户是否已经签到 
+	public Sign selectUserSignDataDao(@Param("userId") int userId, @Param("signId") int signId); -->
+	<select id="selectUserSignDataDao" resultMap="signMap">
+		select * from dlpu_user_sign where userid=#{userId} and signid=#{signId}
+	</select>
+</mapper>

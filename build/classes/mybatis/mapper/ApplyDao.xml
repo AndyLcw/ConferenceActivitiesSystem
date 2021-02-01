@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.ApplyDao">
+	<!-- // 生成发布报名数据 public void insertApplyDao(Apply apply); -->
+	<insert id="insertApplyDao" parameterType="edu.dlpu.bean.Apply">
+		<selectKey keyProperty="applyId" order="BEFORE"
+			resultType="Integer">
+			select
+			seq_dlpu_apply.nextval as applyid from dual
+		</selectKey>
+		insert into dlpu_apply(applyid,confid,applyinfo)
+		values(#{applyId},#{confId},#{applyInfo})
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Apply" id="applyMap">
+		<id property="applyId" column="applyid" />
+		<result property="confId" column="confid" />
+		<result property="applyInfo" column="applyinfo" />
+	</resultMap>
+
+	<!-- // 查询所有报名数据（校验、显示） public ArrayList<Apply> selectAllApplyDao(); -->
+	<select id="selectAllApplyDao" resultMap="applyMap">
+		select * from
+		dlpu_apply order by applyid
+	</select>
+
+	<!-- // 修改报名表数据 public void updateApplyDao(Apply apply); -->
+	<update id="updateApplyDao" parameterType="edu.dlpu.bean.Apply">
+		update dlpu_apply
+		<trim prefix="set" suffixOverrides=",">
+			<if test="applyId!=null">applyid=#{applyId},</if>
+			<if test="confId!=null">confid=#{confId}</if>
+			<if test="applyInfo!=null">applyinfo=#{applyInfo}</if>
+		</trim>
+		where applyid=#{applyId}
+	</update>
+
+	<!-- // 删除报名表数据 public void deleteApplyByIdDao(int applyId); -->
+	<delete id="deleteApplyByIdDao">
+		delete from dlpu_apply where applyid=#{applyId}
+	</delete>
+
+	<!-- // 查询单条报名表数据 public Apply selectApplyByIdDao(int applyId); -->
+	<select id="selectApplyByIdDao" resultMap="applyMap">
+		select * from
+		dlpu_apply where applyid=#{applyId}
+	</select>
+
+	<!-- // 查询单条报名表数据 public Apply selectApplyByConfIdDao(int confId); -->
+	<select id="selectApplyByConfIdDao" resultMap="applyMap">
+		select * from
+		dlpu_apply where confid=#{confId}
+	</select>
+
+	<!-- // 记录用户报名数据 public void insertUserApplyDao(Apply apply); -->
+	<insert id="insertUserApplyDao"
+		parameterType="edu.dlpu.bean.Apply">
+		insert into dlpu_user_apply(userid,applyid,applytime)
+		values(#{userId},#{applyId},sysdate)
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Apply" id="userApplyMap">
+		<id property="applyId" column="applyid" />
+		<result property="confId" column="confid" />
+		<result property="applyTime" column="applytime" />
+	</resultMap>
+
+	<!-- // 查询用户是否已经报名 public int selectUserApplyDataDao(int userId,int applyId); -->
+	<select id="selectUserApplyDataDao" resultMap="userApplyMap">
+		select * from
+		dlpu_user_apply where userid=#{userId} and applyid=#{applyId}
+	</select>
+</mapper>

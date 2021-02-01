@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.FeedbackDao">
+	<!-- 提交反馈 public void insertFeedbackDao(Feedback fb); -->
+	<insert id="insertFeedbackDao"
+		parameterType="edu.dlpu.bean.Feedback">
+		<selectKey keyProperty="fbId" order="BEFORE"
+			resultType="Integer">
+			select seq_dlpu_feedback.nextval as fbid from dual
+		</selectKey>
+		insert into
+		dlpu_feedback(fbid,userid,usercall,fbsubject,fbcontent,fbcontact)
+		values(#{fbId},#{userId,jdbcType=INTEGER},#{userCall},#{fbSubject},#{fbContent},#{fbContact})
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Feedback" id="fbMap">
+		<id column="fbId" property="fbId" />
+		<result column="userId" property="userId" />
+		<result column="userCall" property="userCall" />
+		<result column="fbSubject" property="fbSubject" />
+		<result column="fbContact" property="fbContact" />
+		<result column="fbContent" property="fbContent" />
+	</resultMap>
+
+	<!-- // 查询所有反馈 public ArrayList<Feedback> selectAllFeedbackDao(); -->
+	<select id="selectAllFeedbackDao" resultMap="fbMap">
+		select * from
+		dlpu_feedback order by fbid
+	</select>
+</mapper>

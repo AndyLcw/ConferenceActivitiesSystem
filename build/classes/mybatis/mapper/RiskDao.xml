@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.dlpu.dao.RiskDao">
+	<!-- // 创建签到任务 public void insertRiskDao(Risk risk); -->
+	<!-- 需要对应管理员_签到任务表 -->
+	<insert id="insertRiskDao" parameterType="edu.dlpu.bean.Risk">
+		<selectKey keyProperty="riskId" order="BEFORE"
+			resultType="Integer">
+			select
+			seq_dlpu_risk.nextval as riskid from dual
+		</selectKey>
+		insert all
+		into
+		dlpu_risk(riskid,confid,riskname,riskintro)
+		values(#{riskId},#{confId},#{riskName},#{riskIntro})
+		into
+		dlpu_admin_risk(adminid,riskid)
+		values(#{adminId},#{riskId})
+		select *
+		from dual
+	</insert>
+
+	<resultMap type="edu.dlpu.bean.Risk" id="riskMap">
+		<id property="riskId" column="riskId" />
+		<result property="confId" column="confId" />
+		<result property="signId" column="signId" />
+		<result property="adminId" column="adminId" />
+		<result property="riskName" column="riskName" />
+		<result property="riskIntro" column="riskIntro" />
+		<result property="riskOpenTime" column="riskOpenTime" />
+		<result property="riskEndTime" column="riskEndTime" />
+		<result property="riskState" column="riskState" />
+		<result property="signTime" column="signTime" />
+	</resultMap>
+
+	<!-- // 查询所有签到任务 public ArrayList<Risk> selectAllRiskDao(); -->
+	<select id="selectAllRiskDao" resultMap="riskMap">
+		select * from dlpu_risk order by riskid
+	</select>
+
+	<!-- // 修改签到任务（动态SQL） public void updateRiskDao(Risk risk); -->
+	<update id="updateRiskDao" parameterType="edu.dlpu.bean.Risk">
+		update dlpu_risk
+		<trim prefix="set" suffixOverrides=",">
+			<if test="confId!=null">confId=#{confId,jdbcType=INTEGER},</if>
+			<if test="signId!=null">signId=#{signId,jdbcType=INTEGER},</if>
+			<if test="riskName!=null">riskName=#{riskName},</if>
+			<if test="riskIntro!=null">riskIntro=#{riskIntro},</if>
+			<if test="riskOpenTime!=null">riskOpenTime=#{riskOpenTime,jdbcType=TIMESTAMP},</if>
+			<if test="riskEndTime!=null">riskEndTime=#{riskEndTime,jdbcType=TIMESTAMP},</if>
+			<if test="riskState!=null">riskState=#{riskState},</if>
+		</trim>
+		where riskId=#{riskId}
+	</update>
+
+	<!-- // 对比签到任务创建者身份 public int selectAdminIdByRiskIdDao(int riskId); -->
+	<select id="selectAdminIdByRiskIdDao" resultType="INTEGER"
+		parameterType="java.lang.Integer">
+		select adminid from dlpu_admin_risk
+		where
+		riskid=#{riskId}
+	</select>
+
+	<!-- //通过riskId查签到任务表 public Risk selectRiskByIdDao(int riskId); -->
+	<select id="selectRiskByIdDao" resultMap="riskMap"
+		parameterType="java.lang.Integer">
+		select * from dlpu_risk where riskid=#{riskId}
+	</select>
+
+	<!-- // 通过riskId删除签到任务 public void deleteRiskByIdDao(int riskId); -->
+	<delete id="deleteRiskByIdDao">
+		delete from dlpu_risk where riskid=#{riskId}
+	</delete>
+
+	<!-- // 通过riskId删除管理员_签到任务表对应关系 public void deleteAdmin_RiskRalationDao(int 
+		riskId); -->
+	<delete id="deleteAdmin_RiskRalationDao">
+		delete from dlpu_admin_risk where riskid=#{riskId}
+	</delete>
+
+	<!-- // 通过会议id查询签到任务表 public Risk selectRiskByConfIdDao(int confId); -->
+	<select id="selectRiskByConfIdDao" resultMap="riskMap"
+		parameterType="java.lang.Integer">
+		select * from dlpu_risk where confid=#{confId}
+	</select>
+
+	<!-- // 查询用户所有的签到（连接查询） public ArrayList<Risk> selectAllUserSignDao(int userId); -->
+	<select id="selectAllUserSignDao" resultMap="riskMap">
+		select
+		r.*,us.signtime from dlpu_risk r inner join dlpu_user_sign us on
+		r.signid=us.signid where userid=#{userId}
+	</select>
+</mapper>
